@@ -4,3 +4,4 @@ __pycache__/
 *.env
 # Ignore virtual environment folder
 venv/
+uploads/
