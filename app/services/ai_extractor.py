@@ -5,6 +5,9 @@ from app.schemas.cheque_schema import (
     CompanyChequeList,
     BankChequeList
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def extract_company_cheques(raw_text: str):
@@ -31,6 +34,21 @@ def extract_company_cheques(raw_text: str):
         "format_instructions": parser.get_format_instructions()
     })
 
+    logger.info(f"Company extraction - Raw result: {len(result.cheques)} cheques extracted")
+    logger.debug(f"Company raw cheques: {result.cheques}")
+    
+    # Filter incomplete cheques - only require critical fields
+    original_count = len(result.cheques)
+    result.cheques = [
+        c for c in result.cheques
+        if c.cheque_number and c.amount  # Only require cheque number and amount
+    ]
+    
+    filtered_count = original_count - len(result.cheques)
+    if filtered_count > 0:
+        logger.warning(f"Company extraction - Filtered out {filtered_count} incomplete cheques")
+    logger.info(f"Company extraction - Final result: {len(result.cheques)} valid cheques")
+
     return result
 
 
@@ -44,6 +62,10 @@ def extract_bank_cheques(raw_text: str):
             "You are a banking document expert. "
             "Extract only cleared cheque details from the bank statement. "
             "Ignore unrelated transactions."
+            "Also instno refers to cheque number so if instno is shown that means it is cheque no"
+            """Do not include empty objects.
+            Only include fully populated cheque entries.
+            If no cheque data exists, return an empty list."""
         ),
         (
             "human",
@@ -57,5 +79,20 @@ def extract_bank_cheques(raw_text: str):
         "document": raw_text,
         "format_instructions": parser.get_format_instructions()
     })
+
+    logger.info(f"Bank extraction - Raw result: {len(result.cashed_cheques)} cheques extracted")
+    logger.debug(f"Bank raw cheques: {result.cashed_cheques}")
+    
+    # Filter incomplete bank cheques
+    original_count = len(result.cashed_cheques)
+    result.cashed_cheques = [
+        c for c in result.cashed_cheques
+        if c.cheque_number and c.clearing_date and c.amount
+    ]
+    
+    filtered_count = original_count - len(result.cashed_cheques)
+    if filtered_count > 0:
+        logger.warning(f"Bank extraction - Filtered out {filtered_count} incomplete cheques")
+    logger.info(f"Bank extraction - Final result: {len(result.cashed_cheques)} valid cheques")
 
     return result

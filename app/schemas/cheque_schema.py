@@ -1,12 +1,12 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 
 class CompanyCheque(BaseModel):
-    cheque_number: str = Field(..., description="Cheque number")
-    payee_name: str = Field(..., description="Person or company receiving payment")
-    amount: float = Field(..., description="Cheque amount")
-    issue_date: str = Field(..., description="Cheque issue date")
+    cheque_number: Optional[str] = Field(None, description="Cheque number")
+    payee_name: Optional[str] = Field(None, description="Person or company receiving payment")
+    amount: Optional[float] = Field(None, description="Cheque amount")
+    issue_date: Optional[str] = Field(None, description="Cheque issue date")
 
 
 class CompanyChequeList(BaseModel):
@@ -14,9 +14,9 @@ class CompanyChequeList(BaseModel):
 
 
 class BankCheque(BaseModel):
-    cheque_number: str = Field(..., description="Cheque number")
-    clearing_date: str = Field(..., description="Date cheque was cleared")
-    amount: float = Field(..., description="Cleared amount")
+    cheque_number: Optional[str] = Field(None, description="Cheque number")
+    clearing_date: Optional[str] = Field(None, description="Date cheque was cleared")
+    amount: Optional[float] = Field(None, description="Cleared amount")
 
 
 class BankChequeList(BaseModel):
